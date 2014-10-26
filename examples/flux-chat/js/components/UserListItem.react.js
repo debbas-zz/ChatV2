@@ -13,29 +13,33 @@
  */
 
 var React = require('react');
+var cx = require('react/lib/cx');
 
 var ReactPropTypes = React.PropTypes;
 
-var MessageListItem = React.createClass({
+var UserListItem = React.createClass({
 
   propTypes: {
-    message: ReactPropTypes.object
+    user: ReactPropTypes.object,
   },
 
+
   render: function() {
-    var message = this.props.message;
-    var date = new Date(message.date);
+  
+    var user = this.props.user;
+    
+    //console.log(user);
     return (
-      <li className="message-list-item">
-        <h5 className="message-author-name">{message.authorName}</h5>
-        <div className="message-time">
-          {date.toLocaleTimeString()}
-        </div>
-        <div className="message-text">{message.text}</div>
+      <li
+        className={cx({
+          'thread-list-item': true})}>
+        <h5 className="thread-name">{user.userName}</h5>
+        
       </li>
     );
   }
 
+
 });
 
-module.exports = MessageListItem;
+module.exports = UserListItem;

@@ -19,14 +19,18 @@ var ChatServerActionCreators = require('../actions/ChatServerActionCreators');
 // the contents of the functions are just trying to simulate client-server
 // communication and server-side processing.
 
+//var socket = io.connect();
+
 module.exports = {
 
   getAllMessages: function() {
     // simulate retrieving data from a database
     var rawMessages = JSON.parse(localStorage.getItem('messages'));
+	var users =  JSON.parse(localStorage.getItem('users'));
+
 
     // simulate success callback
-    ChatServerActionCreators.receiveAll(rawMessages);
+    ChatServerActionCreators.receiveAll(rawMessages, users);
   },
 
   createMessage: function(message, threadName) {

@@ -12,67 +12,62 @@
  * @jsx React.DOM
  */
 
-var MessageComposer = require('./MessageComposer.react');
-var MessageListItem = require('./MessageListItem.react');
-var MessageStore = require('../stores/MessageStore');
 var React = require('react');
+var UserListItem = require('../components/UserListItem.react');
 var ThreadStore = require('../stores/ThreadStore');
+var UserStore = require('../stores/UserStore');
+
 
 function getStateFromStores() {
   return {
-    messages: MessageStore.getAllForCurrentThread(),
-    thread: ThreadStore.getCurrent()
+  	users: UserStore.getAllForCurrentThread(),
+    threads: ThreadStore.getAllChrono(),
+    currentThreadID: ThreadStore.getCurrentID()
   };
 }
 
-function getMessageListItem(message) {
-  return (
-    <MessageListItem
-      key={message.id}
-      message={message}
-    />
-  );
-}
-
-var MessageSection = React.createClass({
+var UsersSection = React.createClass({
 
   getInitialState: function() {
+  	//console.log(getStateFromStores());
     return getStateFromStores();
   },
-
+  
+  
   componentDidMount: function() {
-    this._scrollToBottom();
-    MessageStore.addChangeListener(this._onChange);
+    UserStore.addChangeListener(this._onChange);
     ThreadStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function() {
-    MessageStore.removeChangeListener(this._onChange);
+    UserStore.removeChangeListener(this._onChange);
     ThreadStore.removeChangeListener(this._onChange);
   },
 
+
   render: function() {
-    var messageListItems = this.state.messages.map(getMessageListItem);
+    var usersListItems = this.state.users.map(function(user) {
+      return (
+        <UserListItem 
+        	key={user.id}
+			user={user}
+        />
+      );
+    }, this);
+
     return (
-      <div className="message-section">
-        <h3 className="message-thread-heading">{this.state.thread.name}</h3>
-        <ul className="message-list" ref="messageList">
-          {messageListItems}
-        </ul>
-        <MessageComposer />
+      <div className="users-section">
+        <div className="message-thread-heading">
+          Users
+        </div>
+        <ul className="thread-list">
+          {usersListItems}
+          </ul>
       </div>
     );
   },
-
-  componentDidUpdate: function() {
-    this._scrollToBottom();
-  },
-
-  _scrollToBottom: function() {
-    var ul = this.refs.messageList.getDOMNode();
-    ul.scrollTop = ul.scrollHeight;
-  },
-
+  
+  
   /**
    * Event handler for 'change' events coming from the MessageStore
    */
@@ -80,6 +75,8 @@ var MessageSection = React.createClass({
     this.setState(getStateFromStores());
   }
 
+
+
 });
 
-module.exports = MessageSection;
+module.exports = UsersSection;

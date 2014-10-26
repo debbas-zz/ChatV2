@@ -17,10 +17,29 @@
 var ChatApp = require('./components/ChatApp.react');
 var ChatExampleData = require('./ChatExampleData');
 var ChatWebAPIUtils = require('./utils/ChatWebAPIUtils');
+var UserStore = require('./stores/UserStore');
+
 var React = require('react');
+
 window.React = React; // export for http://fb.me/react-devtools
 
-ChatExampleData.init(); // load example data into localstorage
+
+var socket = io();
+
+
+var username;
+
+while(username == null || username == "")
+{
+	username = prompt("Please pick a username", "");
+	socket.emit('add user', username);
+}
+
+
+UserStore.setCurrentID(username);
+
+ChatExampleData.init(username); // load example data into localstorag
+
 
 ChatWebAPIUtils.getAllMessages();
 

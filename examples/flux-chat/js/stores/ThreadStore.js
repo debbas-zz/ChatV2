@@ -24,7 +24,7 @@ var _threads = {};
 
 var ThreadStore = merge(EventEmitter.prototype, {
 
-  init: function(rawMessages) {
+  init: function(rawMessages, users) {
     rawMessages.forEach(function(message) {
       var threadID = message.threadID;
       var thread = _threads[threadID];
@@ -34,10 +34,18 @@ var ThreadStore = merge(EventEmitter.prototype, {
       _threads[threadID] = {
         id: threadID,
         name: message.threadName,
+        users: [],
         lastMessage: ChatMessageUtils.convertRawMessage(message, _currentID)
       };
     }, this);
-
+    
+    users.forEach(function(user) {
+          var threadID = user.threadID;
+    	 _threads[threadID].users.push(user);
+    },this);
+	
+	//console.debug(_threads);
+	
     if (!_currentID) {
       var allChrono = this.getAllChrono();
       _currentID = allChrono[allChrono.length - 1].id;
@@ -95,7 +103,7 @@ var ThreadStore = merge(EventEmitter.prototype, {
   getCurrentID: function() {
     return _currentID;
   },
-
+	
   getCurrent: function() {
     return this.get(this.getCurrentID());
   }
@@ -114,7 +122,7 @@ ThreadStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
       break;
 
     case ActionTypes.RECEIVE_RAW_MESSAGES:
-      ThreadStore.init(action.rawMessages);
+      ThreadStore.init(action.rawMessages,action.users);
       ThreadStore.emitChange();
       break;
 

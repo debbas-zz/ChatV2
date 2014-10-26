@@ -26,15 +26,22 @@
   padding: 0;
 }
 
-.message-section {
+.users-section {
   float: right;
-  width: 65%;
+  width: 22.5%;
+}
+
+
+.message-section {
+  float: left;
+  width: 45%;
 }
 
 .thread-section {
   float: left;
   width: 32.5%;
 }
+
 
 .message-thread-heading,
 .thread-count {

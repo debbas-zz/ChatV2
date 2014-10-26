@@ -15,6 +15,7 @@
 var MessageSection = require('./MessageSection.react');
 var React = require('react');
 var ThreadSection = require('./ThreadSection.react');
+var UsersSection = require('./UsersSection.react');
 
 var ChatApp = React.createClass({
 
@@ -23,6 +24,7 @@ var ChatApp = React.createClass({
       <div className="chatapp">
         <ThreadSection />
         <MessageSection />
+        <UsersSection />
       </div>
     );
   }
@@ -30,3 +32,5 @@ var ChatApp = React.createClass({
 });
 
 module.exports = ChatApp;
+
+

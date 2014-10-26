@@ -17,10 +17,11 @@ var ActionTypes = ChatConstants.ActionTypes;
 
 module.exports = {
 
-  receiveAll: function(rawMessages) {
+  receiveAll: function(rawMessages, users) {
     ChatAppDispatcher.handleServerAction({
       type: ActionTypes.RECEIVE_RAW_MESSAGES,
-      rawMessages: rawMessages
+      rawMessages: rawMessages,
+      users:users
     });
   },
 

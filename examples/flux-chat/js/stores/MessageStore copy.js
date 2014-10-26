@@ -15,20 +15,12 @@ var ChatConstants = require('../constants/ChatConstants');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var EventEmitter = require('events').EventEmitter;
 var ThreadStore = require('../stores/ThreadStore');
-var UserStore = require('../stores/UserStore');
-
 var merge = require('react/lib/merge');
 
 var ActionTypes = ChatConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-//var socket = localStorage.getItem('socket');
-
-var socket = io();
-var username = 	UserStore.getCurrentID();
-
 var _messages = {};
-
 
 function _addMessages(rawMessages) {
   rawMessages.forEach(function(message) {
@@ -49,60 +41,8 @@ function _markAllInThreadRead(threadID) {
   }
 }
 
-
 var MessageStore = merge(EventEmitter.prototype, {
 
-	getInitialState: function(){
-		socket.on('login', this.login);
-		socket.on('new message', this.messageRecieve);
-		socket.on('user joined', this.userJoined);
-		socket.on('user left', this.userLeft);
-
-		return {users: [], messages:[], text: ''};
-	},
-	
-
-	login: function(data){
-		var message = "Welcome to Debbas Chat!! ";
-		console.log(message);
-		//this.addChatMessage(data);
-	},
-	
-	messageRecieve: function(data){
-		console.log("MSG receieved");
-		console.log(data.message);
-		addChatMessage(data.message);
-	},
-	
-	userJoined: function(data){
-		console.log(data);
-		var timestamp = Date.now();
-  		var msg = {
-      		id: 'm_' + timestamp,
-      		threadID: ThreadStore.getCurrentID(),
-      		authorName: 'Server', // hard coded for the example
-      		date: new Date(timestamp),
-      		text: data.username + " joined",
-      		isRead: true
-    	};
-    	addChatMessage(msg);
-	},
-	
-	
-	userLeft: function(data){
-		console.log(data);
-		var timestamp = Date.now();
-  		var msg = {
-      		id: 'm_' + timestamp,
-      		threadID: ThreadStore.getCurrentID(),
-      		authorName: 'Server', // hard coded for the example
-      		date: new Date(timestamp),
-      		text: data.username + " left",
-      		isRead: true
-    	};
-    	addChatMessage(msg);
-	},
-	
   emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
@@ -148,36 +88,22 @@ var MessageStore = merge(EventEmitter.prototype, {
   },
 
   getCreatedMessageData: function(text) {
-  
     var timestamp = Date.now();
     return {
       id: 'm_' + timestamp,
       threadID: ThreadStore.getCurrentID(),
-      authorName: "test",
+      authorName: 'Bill', // hard coded for the example
       date: new Date(timestamp),
       text: text,
       isRead: true
     };
-    
-    
   }
 
 });
 
-
-function addChatMessage(message) {
-	_messages[message.id] = message;
-	MessageStore.emitChange();
-
-}
-
 MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
-
-  MessageStore.getInitialState();
-
   var action = payload.action;
-	
-	
+
   switch(action.type) {
 
     case ActionTypes.CLICK_THREAD:
@@ -189,7 +115,6 @@ MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
     case ActionTypes.CREATE_MESSAGE:
       var message = MessageStore.getCreatedMessageData(action.text);
       _messages[message.id] = message;
-            socket.emit('new message', message);
       MessageStore.emitChange();
       break;
 
@@ -205,7 +130,5 @@ MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
   }
 
 });
-
-
 
 module.exports = MessageStore;
