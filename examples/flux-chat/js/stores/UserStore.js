@@ -19,29 +19,44 @@ var merge = require('react/lib/merge');
 var ActionTypes = ChatConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
+var ChatThreadActionCreators = require('../actions/ChatThreadActionCreators');
+
 
 var _currentID = null;
 var _users = {};
+var socket = io();
+
 
 function _addUsers(users) {
-  users.forEach(function(user) {
-    if (!_users[user.id]) {
-      _users[user.id] = user;
-    }
-  });
-}
-
-function _markAllInThreadRead(threadID) {
-  for (var id in _users) {
-    if (_users[id].threadID === threadID) {
-      //_users[id].isRead = true;
+  for (var key in users) {
+  	var user = users[key];
+    if (!_users[user.userName]) {
+      _users[user.userName] = user;
     }
   }
 }
 
+
 var UserStore = merge(EventEmitter.prototype, {
 
-  emitChange: function() {
+	getInitialState: function(){
+		socket.on('login', this.login);
+		socket.on('update users', this.updateUsers);
+	},
+	
+	
+	login: function(data){
+		_users = data;
+		this.emit(CHANGE_EVENT);
+	},
+
+	
+	updateUsers: function(data){
+		_users = data;
+		ChatThreadActionCreators.clickThread(ThreadStore.getCurrentID());
+	},
+	
+	 emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
 
@@ -53,7 +68,7 @@ var UserStore = merge(EventEmitter.prototype, {
   },
 
   get: function(id) {
-    return _users[id];
+    return _users[ThreadStore.getCurrentID()].users[id];
   },
 
   getAll: function() {
@@ -65,10 +80,12 @@ var UserStore = merge(EventEmitter.prototype, {
    */
   getAllForThread: function(threadID) {
     var threadUsers = [];
-    for (var id in _users) {
-      if (_users[id].threadID === threadID) {
-        threadUsers.push(_users[id]);
-      }
+    
+    if (!_users[threadID])
+    	return threadUsers;
+    var users  = _users[threadID].users;
+    for (var userName in users) {
+        threadUsers.push(users[userName]);
     }
     threadUsers.sort(function(a, b) {
       if (a.userName < b.userName) {
@@ -101,6 +118,9 @@ var UserStore = merge(EventEmitter.prototype, {
 
 });
 
+UserStore.getInitialState();
+
+
 UserStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
   var action = payload.action;
 
@@ -108,14 +128,11 @@ UserStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
 
     case ActionTypes.CLICK_THREAD:
       ChatAppDispatcher.waitFor([ThreadStore.dispatchToken]);
-      _markAllInThreadRead(ThreadStore.getCurrentID());
       UserStore.emitChange();
       break;
 	 
 	 case ActionTypes.RECEIVE_RAW_MESSAGES:
-      _addUsers(action.users);
       ChatAppDispatcher.waitFor([ThreadStore.dispatchToken]);
-      _markAllInThreadRead(ThreadStore.getCurrentID());
       UserStore.emitChange();
       break;
 

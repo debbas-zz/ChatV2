@@ -54,35 +54,38 @@ var MessageStore = merge(EventEmitter.prototype, {
 
 	getInitialState: function(){
 		socket.on('login', this.login);
-		socket.on('new message', this.messageRecieve);
+		socket.on('update chat', this.messageRecieve);
 		socket.on('user joined', this.userJoined);
 		socket.on('user left', this.userLeft);
-
-		return {users: [], messages:[], text: ''};
 	},
 	
 
 	login: function(data){
-		var message = "Welcome to Debbas Chat!! ";
-		console.log(message);
-		//this.addChatMessage(data);
+		var timestamp = Date.now();
+		var msg = {
+      		id: 'm_' + timestamp,
+      		threadID: ThreadStore.getCurrentID(),
+      		authorName: 'Server', // hard coded for the example
+      		date: new Date(timestamp),
+      		text: "Welcome to Debbas Chat!! ",
+      		isRead: true
+    	};
+    	addChatMessage(msg);
 	},
 	
 	messageRecieve: function(data){
-		console.log("MSG receieved");
 		console.log(data.message);
 		addChatMessage(data.message);
 	},
 	
 	userJoined: function(data){
-		console.log(data);
 		var timestamp = Date.now();
   		var msg = {
       		id: 'm_' + timestamp,
       		threadID: ThreadStore.getCurrentID(),
       		authorName: 'Server', // hard coded for the example
       		date: new Date(timestamp),
-      		text: data.username + " joined",
+      		text: data.userName + " joined",
       		isRead: true
     	};
     	addChatMessage(msg);
@@ -90,14 +93,13 @@ var MessageStore = merge(EventEmitter.prototype, {
 	
 	
 	userLeft: function(data){
-		console.log(data);
 		var timestamp = Date.now();
   		var msg = {
       		id: 'm_' + timestamp,
       		threadID: ThreadStore.getCurrentID(),
       		authorName: 'Server', // hard coded for the example
       		date: new Date(timestamp),
-      		text: data.username + " left",
+      		text: data.userName + " left",
       		isRead: true
     	};
     	addChatMessage(msg);
@@ -171,9 +173,11 @@ function addChatMessage(message) {
 
 }
 
+MessageStore.getInitialState();
+
+
 MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
 
-  MessageStore.getInitialState();
 
   var action = payload.action;
 	
@@ -189,7 +193,7 @@ MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
     case ActionTypes.CREATE_MESSAGE:
       var message = MessageStore.getCreatedMessageData(action.text);
       _messages[message.id] = message;
-            socket.emit('new message', message);
+      socket.emit('send chat', message);
       MessageStore.emitChange();
       break;
 

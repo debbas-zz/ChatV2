@@ -22,9 +22,10 @@ var CHANGE_EVENT = 'change';
 var _currentID = null;
 var _threads = {};
 
+var socket = io();
 var ThreadStore = merge(EventEmitter.prototype, {
 
-  init: function(rawMessages, users) {
+  init: function(rawMessages) {
     rawMessages.forEach(function(message) {
       var threadID = message.threadID;
       var thread = _threads[threadID];
@@ -34,21 +35,13 @@ var ThreadStore = merge(EventEmitter.prototype, {
       _threads[threadID] = {
         id: threadID,
         name: message.threadName,
-        users: [],
         lastMessage: ChatMessageUtils.convertRawMessage(message, _currentID)
       };
     }, this);
-    
-    users.forEach(function(user) {
-          var threadID = user.threadID;
-    	 _threads[threadID].users.push(user);
-    },this);
-	
-	//console.debug(_threads);
-	
+    	
     if (!_currentID) {
       var allChrono = this.getAllChrono();
-      _currentID = allChrono[allChrono.length - 1].id;
+      _currentID = allChrono[0].id;
     }
 
     _threads[_currentID].lastMessage.isRead = true;
@@ -118,11 +111,12 @@ ThreadStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
     case ActionTypes.CLICK_THREAD:
       _currentID = action.threadID;
       _threads[_currentID].lastMessage.isRead = true;
+      socket.emit('switch room', _currentID);
       ThreadStore.emitChange();
       break;
 
     case ActionTypes.RECEIVE_RAW_MESSAGES:
-      ThreadStore.init(action.rawMessages,action.users);
+      ThreadStore.init(action.rawMessages);
       ThreadStore.emitChange();
       break;
 

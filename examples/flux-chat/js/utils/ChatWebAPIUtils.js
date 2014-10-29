@@ -26,11 +26,9 @@ module.exports = {
   getAllMessages: function() {
     // simulate retrieving data from a database
     var rawMessages = JSON.parse(localStorage.getItem('messages'));
-	var users =  JSON.parse(localStorage.getItem('users'));
-
 
     // simulate success callback
-    ChatServerActionCreators.receiveAll(rawMessages, users);
+    ChatServerActionCreators.receiveAll(rawMessages);
   },
 
   createMessage: function(message, threadName) {

@@ -27,12 +27,12 @@ var ThreadListItem = React.createClass({
 
   render: function() {
     var thread = this.props.thread;
+    console.log("i am being rendered now thread list item");
+    console.log(thread);
     return (
       <li
         className={cx({
-          'thread-list-item': true,
-          'active': thread.id === this.props.currentThreadID
-        })}
+          'thread-list-item': true})}
         onClick={this._onClick}>
         <h5 className="thread-name">{thread.name}</h5>
       </li>

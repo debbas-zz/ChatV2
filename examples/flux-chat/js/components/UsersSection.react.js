@@ -20,16 +20,14 @@ var UserStore = require('../stores/UserStore');
 
 function getStateFromStores() {
   return {
-  	users: UserStore.getAllForCurrentThread(),
-    threads: ThreadStore.getAllChrono(),
-    currentThreadID: ThreadStore.getCurrentID()
+  	users: UserStore.getAllForCurrentThread()
   };
 }
 
 var UsersSection = React.createClass({
 
   getInitialState: function() {
-  	//console.log(getStateFromStores());
+  	console.log(getStateFromStores());
     return getStateFromStores();
   },
   
@@ -47,9 +45,10 @@ var UsersSection = React.createClass({
 
   render: function() {
     var usersListItems = this.state.users.map(function(user) {
+    
       return (
         <UserListItem 
-        	key={user.id}
+        	key={user.userName}
 			user={user}
         />
       );

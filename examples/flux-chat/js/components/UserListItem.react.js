@@ -28,7 +28,6 @@ var UserListItem = React.createClass({
   
     var user = this.props.user;
     
-    //console.log(user);
     return (
       <li
         className={cx({

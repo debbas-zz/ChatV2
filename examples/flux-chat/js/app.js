@@ -25,15 +25,17 @@ window.React = React; // export for http://fb.me/react-devtools
 
 
 var socket = io();
-
-
 var username;
 
-while(username == null || username == "")
-{
-	username = prompt("Please pick a username", "");
-	socket.emit('add user', username);
-}
+socket.on('connect', function(){
+	while(username == null || username == "")
+	{
+		username = prompt("Please pick a username", "");
+		socket.emit('add user', username);
+	}
+});
+
+
 
 
 UserStore.setCurrentID(username);
